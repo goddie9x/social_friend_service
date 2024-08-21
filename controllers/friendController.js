@@ -1,4 +1,5 @@
 const friendService = require('../services/friendService');
+const { CommonException } = require('../util/exceptions/commonExceptions');
 
 class FriendController {
     constructor() {
@@ -11,6 +12,7 @@ class FriendController {
         if (error instanceof CommonException) {
             return res.status(error.statusCode).json(error.message);
         }
+        console.log(error);
         return res.status(500).json({ message: 'Something went wrong, please try again' });
     }
     async index(req, res) {
@@ -67,7 +69,7 @@ class FriendController {
 
             return res.json(friendship);
         } catch (error) {
-            return this.handleResponseError(res,error);
+            return this.handleResponseError(res, error);
         }
     }
 }

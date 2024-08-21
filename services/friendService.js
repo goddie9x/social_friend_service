@@ -1,6 +1,6 @@
 const Friend = require('../models/friend');
 const { FRIENDSHIP } = require('../constants/friend');
-const { TargetAlreadyExistException, TargetNotExistException, BadRequestException } = require('../exceptions/commonExceptions');
+const { TargetAlreadyExistException, TargetNotExistException, BadRequestException } = require('../util/exceptions/commonExceptions');
 
 class FriendService {
     constructor() {

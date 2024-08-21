@@ -1,13 +1,31 @@
 const mongoose = require('../configs/database');
-const { SenderMustDifferentWithReceiverException } = require('../exceptions/friendExceptions');
-const { TargetNotExistException } = require('../exceptions/commonExceptions');
-const { sendKafkaMessageThenReceiveResult } = require('../kafka/producer');
-const { USER_TOPIC } = require('../constants/kafkaTopic');
-const {FRIENDSHIP} = require('../constants/friend');
+const { SenderMustDifferentWithReceiverException } = require('../util/exceptions/friendExceptions');
+const { TargetNotExistException } = require('../util/exceptions/commonExceptions');
+const { FRIENDSHIP } = require('../constants/friend');
+const { userServiceClient, userMessages } = require('../grpc/userClient');
 
 const Schema = mongoose.Schema;
-
 const friendshipArray = Object.values(FRIENDSHIP);
+
+const getUserById = (userId) => {
+    return new Promise((resolve, reject) => {
+        const userIdString = userId.toString();
+        const request = new userMessages.GetUserByIdRequest();
+        request.setId(userIdString);
+
+        userServiceClient.getUserById(request, (error, response) => {
+            if (error) {
+                return reject(error);
+            }
+            const user = {
+                id: response.getId(),
+                username: response.getUsername(),
+            };
+
+            resolve(user);
+        });
+    })
+}
 
 const FriendSchema = new Schema({
     sender: {
@@ -22,7 +40,7 @@ const FriendSchema = new Schema({
     },
     friendshipType: {
         type: String,
-        enum: friendshipArray, 
+        enum: friendshipArray,
         default: FRIENDSHIP.FRIEND,
         required: true,
     },
@@ -47,28 +65,14 @@ FriendSchema.pre('save', async function (next) {
         if (this.sender.equals(this.receiver)) {
             throw new SenderMustDifferentWithReceiverException();
         }
-        const getSenderUserById = sendKafkaMessageThenReceiveResult({
-            topic: USER_TOPIC.REQUEST, messages: {
-                action: 'getUserById',
-                params: {
-                    id: this.sender
-                }
-            }
-        });
-        const getReceiverUserById = sendKafkaMessageThenReceiveResult({
-            topic: USER_TOPIC.REQUEST, messages: {
-                action: 'getUserById',
-                params: {
-                    id: this.receiver
-                }
-            }
-        });
+        const getSenderUserById = getUserById(this.sender);
+        const getReceiverUserById = getUserById(this.receiver);
         const [senderResponse, receiverResponse] = await Promise.all(
             [getSenderUserById,
                 getReceiverUserById]
         );
-        const senderExists = senderResponse && senderResponse.user;
-        const receiverExists = receiverResponse && receiverResponse.user;
+        const senderExists = senderResponse && senderResponse.id;
+        const receiverExists = receiverResponse && receiverResponse.id;
 
         if (!senderExists || !receiverExists) {
             throw new TargetNotExistException('Either the sender or the receiver does not exist.');
