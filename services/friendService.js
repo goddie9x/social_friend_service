@@ -26,12 +26,11 @@ class FriendService {
         };
     }
 
-    async getFriendRequestsWithPagination(req) {
-        const { userId } = req.params;
-        const { page = 1, limit = 10 } = req.query;
+    async getFriendRequestsWithPagination(payloads) {
+        const { id, page = 1, limit = 10 } = payloads;
 
         const query = {
-            receiver: userId,
+            receiver: id,
             isAccepted: false
         };
 
@@ -47,14 +46,13 @@ class FriendService {
         };
     }
 
-    async getFriendListWithPagination(req) {
-        const { userId } = req.params;
-        const { page = 1, limit = 10 } = req.query;
+    async getFriendListWithPagination(payloads) {
+        const { id, page = 1, limit = 10 } = payloads;
 
         const query = {
             $or: [
-                { sender: userId },
-                { receiver: userId }
+                { sender: id },
+                { receiver: id }
             ],
             isAccepted: true
         };
@@ -71,8 +69,8 @@ class FriendService {
         };
     }
 
-    async addFriend(req) {
-        const { currentUser, receiverId, friendshipType } = req.body;
+    async addFriend(payloads) {
+        const { currentUser, receiverId, friendshipType } = payloads;
         const senderId = currentUser.userId;
 
         if (senderId === receiverId) {
@@ -101,9 +99,8 @@ class FriendService {
 
         return friendship;
     }
-    async acceptRequest(req) {
-        const { id } = req.params;
-        const { currentUser } = req.body;
+    async acceptRequest(payloads) {
+        const { id, currentUser } = payloads;
 
         const friendRequest = await Friend.findOne({
             _id: id,
@@ -121,10 +118,8 @@ class FriendService {
 
         return friendRequest;
     }
-    async refuseRequest(req) {
-        const { id } = req.params;
-        const { currentUser } = req.body;
-
+    async refuseRequest(payloads) {
+        const { id, currentUser } = payloads;
         const friendRequest = await Friend.findOneAndDelete({
             _id: id,
             receiver: currentUser.userId,
@@ -135,9 +130,8 @@ class FriendService {
             throw new TargetNotExistException('Friend request not found or already accepted.');
         }
     }
-    async getFriendshipInfo(req) {
-        const { id } = req.params;
-        const { currentUser } = req.body;
+    async getFriendshipInfo(payloads) {
+        const { id, currentUser } = payloads;
 
         const friendship = await Friend.findOne({
             _id: id,

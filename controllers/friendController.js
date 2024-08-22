@@ -17,8 +17,9 @@ class FriendController {
     }
     async index(req, res) {
         try {
+            const payloads = { id: req.params.id, ...req.query };
             const friendRequestsWithPagination =
-                await friendService.getFriendRequestsWithPagination(req);
+                await friendService.getFriendRequestsWithPagination(payloads);
 
             return res.json({ ...friendRequestsWithPagination });
         } catch (error) {
@@ -28,7 +29,8 @@ class FriendController {
 
     async getFriendList(req, res) {
         try {
-            const friendListWithPagination = await friendService.getFriendListWithPagination(req);
+            const payloads = { id: req.params.id, ...req.query };
+            const friendListWithPagination = await friendService.getFriendListWithPagination(payloads);
 
             return res.json({ ...friendListWithPagination });
         } catch (error) {
@@ -38,8 +40,7 @@ class FriendController {
 
     async addFriend(req, res) {
         try {
-            const friendship = await friendService.addFriend(req);
-
+            const friendship = await friendService.addFriend(req.body);
             return res.status(201).json({ message: 'Friend request sent.', friendship });
         } catch (error) {
             return this.handleResponseError(res, error);
@@ -47,7 +48,8 @@ class FriendController {
     }
     async acceptRequest(req, res) {
         try {
-            const friendRequest = await friendService.acceptRequest(req);
+            const payloads = { id: req.params.id, currentUser: req.body.currentUser };
+            const friendRequest = await friendService.acceptRequest(payloads);
 
             res.json({ message: 'Friend request accepted.', friendRequest });
         } catch (error) {
@@ -56,7 +58,9 @@ class FriendController {
     }
     async refuseRequest(req, res) {
         try {
-            await friendService.refuseRequest(req);
+            const payloads = { id: req.params.id, currentUser: req.body.currentUser };
+
+            await friendService.refuseRequest(payloads);
 
             res.json({ message: 'Friend request refused.' });
         } catch (error) {
@@ -65,7 +69,8 @@ class FriendController {
     }
     async getFriendshipInfo(req, res) {
         try {
-            const friendship = await friendService.getFriendshipInfo(req);
+            const payloads = { id: req.params.id, currentUser: req.body.currentUser };
+            const friendship = await friendService.getFriendshipInfo(payloads);
 
             return res.json(friendship);
         } catch (error) {

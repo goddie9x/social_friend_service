@@ -73,7 +73,7 @@ FriendSchema.pre('save', async function (next) {
         );
         const senderExists = senderResponse && senderResponse.id;
         const receiverExists = receiverResponse && receiverResponse.id;
-
+        
         if (!senderExists || !receiverExists) {
             throw new TargetNotExistException('Either the sender or the receiver does not exist.');
         }
