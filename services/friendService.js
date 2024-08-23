@@ -1,6 +1,9 @@
 const Friend = require('../models/friend');
 const { FRIENDSHIP } = require('../constants/friend');
-const { TargetAlreadyExistException, TargetNotExistException, BadRequestException } = require('../util/exceptions/commonExceptions');
+const { TargetAlreadyExistException, TargetNotExistException, BadRequestException } = require('../utils/exceptions/commonExceptions');
+const { sendKafkaMessage } = require('../utils/kafka');
+const { NOTIFICATION_TOPIC } = require('../constants/kafkaTopic');
+const {kafkaProducer} = require('../kafka/producer');
 
 class FriendService {
     constructor() {
@@ -11,13 +14,12 @@ class FriendService {
 
     async getPaginatedResults(query, page, limit) {
         const skip = (page - 1) * limit;
-
-        const results = await Friend.find(query)
+        const getResultsPromise = Friend.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(parseInt(limit));
-
-        const totalDocuments = await Friend.countDocuments(query);
+        const getTotalDocumentsPromise = Friend.countDocuments(query);
+        const [results, totalDocuments] = await Promise.all([getResultsPromise, getTotalDocumentsPromise]);
 
         return {
             results,
@@ -96,7 +98,11 @@ class FriendService {
         });
 
         await friendship.save();
-
+        sendKafkaMessage({
+            topic:NOTIFICATION_TOPIC.REQUEST,
+            kafkaProducer,
+            message:friendship
+        });
         return friendship;
     }
     async acceptRequest(payloads) {

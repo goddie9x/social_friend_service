@@ -1,6 +1,6 @@
 const mongoose = require('../configs/database');
-const { SenderMustDifferentWithReceiverException } = require('../util/exceptions/friendExceptions');
-const { TargetNotExistException } = require('../util/exceptions/commonExceptions');
+const { SenderMustDifferentWithReceiverException } = require('../utils/exceptions/friendExceptions');
+const { TargetNotExistException } = require('../utils/exceptions/commonExceptions');
 const { FRIENDSHIP } = require('../constants/friend');
 const { userServiceClient, userMessages } = require('../grpc/userClient');
 
@@ -42,7 +42,6 @@ const FriendSchema = new Schema({
         type: String,
         enum: friendshipArray,
         default: FRIENDSHIP.FRIEND,
-        required: true,
     },
     createdAt: {
         type: Date,
