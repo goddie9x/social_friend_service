@@ -1,5 +1,5 @@
 const mongoose = require('../configs/database');
-const { SenderMustDifferentWithReceiverException } = require('../utils/exceptions/friendExceptions');
+const { SenderMustDifferentWithReceiverException } = require('../exceptions/friendExceptions');
 const { TargetNotExistException } = require('../utils/exceptions/commonExceptions');
 const { FRIENDSHIP } = require('../constants/friend');
 const { userServiceClient, userMessages } = require('../grpc/userClient');

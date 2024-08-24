@@ -1,10 +1,10 @@
 const Friend = require('../models/friend');
 const { FRIENDSHIP } = require('../constants/friend');
 const { TargetAlreadyExistException, TargetNotExistException, BadRequestException } = require('../utils/exceptions/commonExceptions');
-const { sendKafkaMessage } = require('../utils/kafka');
-const { NOTIFICATION_TOPIC } = require('../constants/kafkaTopic');
-const {kafkaProducer} = require('../kafka/producer');
-
+const { sendCreateNotificationKafkaMessage } = require('../utils/kafka');
+const { kafkaProducer } = require('../kafka/producer');
+const { TYPE: NOTIFICATION_TYPE } = require('../utils/constants/notification');
+const { GEN_FRIEND_REQUEST_LIST_ROUTE } = require('../utils/constants/clientRoute');
 class FriendService {
     constructor() {
         this.getPaginatedResults = this.getPaginatedResults.bind(this);
@@ -98,11 +98,15 @@ class FriendService {
         });
 
         await friendship.save();
-        sendKafkaMessage({
-            topic:NOTIFICATION_TOPIC.REQUEST,
+        sendCreateNotificationKafkaMessage(
             kafkaProducer,
-            message:friendship
-        });
+            {
+                target: friendship.sender,
+                type: NOTIFICATION_TYPE.FRIEND_REQUEST,
+                content: `New friend request <user>${friendship.sender}</user>`,
+                href: GEN_FRIEND_REQUEST_LIST_ROUTE(friendship.sender)
+            }
+        );
         return friendship;
     }
     async acceptRequest(payloads) {
@@ -122,6 +126,15 @@ class FriendService {
         friendRequest.acceptedAt = Date.now();
         await friendRequest.save();
 
+        sendCreateNotificationKafkaMessage(
+            kafkaProducer,
+            {
+                target: friendRequest.receiver,
+                type: NOTIFICATION_TYPE.FRIEND_REQUEST,
+                content: `<user>${friendRequest.receiver}</user> accepted your friend request`,
+                href: GEN_FRIEND_REQUEST_LIST_ROUTE(friendRequest.receiver)
+            }
+        );
         return friendRequest;
     }
     async refuseRequest(payloads) {

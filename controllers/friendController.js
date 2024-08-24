@@ -1,5 +1,5 @@
 const friendService = require('../services/friendService');
-const { CommonException } = require('../util/exceptions/commonExceptions');
+const { CommonException } = require('../utils/exceptions/commonExceptions');
 
 class FriendController {
     constructor() {
