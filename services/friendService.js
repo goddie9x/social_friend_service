@@ -141,7 +141,10 @@ class FriendService {
         const { id, currentUser } = payloads;
         const friendRequest = await Friend.findOneAndDelete({
             _id: id,
-            receiver: currentUser.userId,
+            $or: [
+                { receiver: currentUser.userId },
+                { sender: currentUser.userId }
+            ],
             isAccepted: false
         });
 
