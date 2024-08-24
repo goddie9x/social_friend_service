@@ -6,6 +6,7 @@ const mapNormalUserRoute = router=>{
     router.post('/add',friendController.addFriend);
     router.put('/accept/:id',friendController.acceptRequest);
     router.delete('/refuse/:id',friendController.refuseRequest);
+    router.delete('/friend-list/:id',friendController.deleteFriendship);
     router.post('/detail/:id',friendController.getFriendshipInfo);
 }
 

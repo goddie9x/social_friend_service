@@ -7,6 +7,7 @@ class FriendController {
         this.acceptRequest = this.acceptRequest.bind(this);
         this.getFriendList = this.getFriendList.bind(this);
         this.getFriendshipInfo = this.getFriendshipInfo.bind(this);
+        this.refuseRequest = this.refuseRequest.bind(this);
     }
     handleResponseError(res, error) {
         if (error instanceof CommonException) {
@@ -63,6 +64,17 @@ class FriendController {
             await friendService.refuseRequest(payloads);
 
             res.json({ message: 'Friend request refused.' });
+        } catch (error) {
+            return this.handleResponseError(res, error);
+        }
+    }
+    async deleteFriendship(req, res) {
+        try {
+            const payloads = { id: req.params.id, currentUser: req.body.currentUser };
+
+            await friendService.deleteFriendship(payloads);
+
+            res.json({ message: 'Friendship refused.' });
         } catch (error) {
             return this.handleResponseError(res, error);
         }

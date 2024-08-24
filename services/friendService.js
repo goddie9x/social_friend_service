@@ -149,6 +149,22 @@ class FriendService {
             throw new TargetNotExistException('Friend request not found or already accepted.');
         }
     }
+    async deleteFriendship(payloads) {
+        const { id, currentUser } = payloads;
+
+        const friendRequest = await Friend.findOneAndDelete({
+            _id: id,
+            $or: [
+                { receiver: currentUser.userId },
+                { sender: currentUser.userId }
+            ],
+            isAccepted: true
+        });
+
+        if (!friendRequest) {
+            throw new TargetNotExistException('Friendship not found or already accepted.');
+        }
+    }
     async getFriendshipInfo(payloads) {
         const { id, currentUser } = payloads;
 
