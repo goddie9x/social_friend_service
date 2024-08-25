@@ -1,41 +1,35 @@
 const friendService = require('../services/friendService');
-const { CommonException } = require('../utils/exceptions/commonExceptions');
+const BasicController = require('../utils/controllers/basicController');
 
-class FriendController {
+class FriendController extends BasicController {
     constructor() {
+        super();
         this.addFriend = this.addFriend.bind(this);
         this.acceptRequest = this.acceptRequest.bind(this);
         this.getFriendList = this.getFriendList.bind(this);
         this.getFriendshipInfo = this.getFriendshipInfo.bind(this);
         this.refuseRequest = this.refuseRequest.bind(this);
     }
-    handleResponseError(res, error) {
-        if (error instanceof CommonException) {
-            return res.status(error.statusCode).json(error.message);
-        }
-        console.log(error);
-        return res.status(500).json({ message: 'Something went wrong, please try again' });
-    }
     async index(req, res) {
         try {
-            const payloads = { id: req.params.id, ...req.query };
+            const payloads = { id: req.params.id, ...req.query, currentUser: req.body.currentUser };
             const friendRequestsWithPagination =
                 await friendService.getFriendRequestsWithPagination(payloads);
 
             return res.json({ ...friendRequestsWithPagination });
         } catch (error) {
-            return res.status(500).json({ message: error.message });
+            return this.handleResponseError(res, error);
         }
     }
 
     async getFriendList(req, res) {
         try {
-            const payloads = { id: req.params.id, ...req.query };
+            const payloads = { id: req.params.id, ...req.query, currentUser: req.body.currentUser };
             const friendListWithPagination = await friendService.getFriendListWithPagination(payloads);
 
             return res.json({ ...friendListWithPagination });
         } catch (error) {
-            return res.status(500).json({ message: error.message });
+            return this.handleResponseError(res, error);
         }
     }
 

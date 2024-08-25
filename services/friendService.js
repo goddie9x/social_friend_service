@@ -1,43 +1,35 @@
 const Friend = require('../models/friend');
+const BasicService = require('../utils/services/basicService');
 const { FRIENDSHIP } = require('../constants/friend');
 const { TargetAlreadyExistException, TargetNotExistException, BadRequestException } = require('../utils/exceptions/commonExceptions');
 const { sendCreateNotificationKafkaMessage } = require('../utils/kafka');
 const { kafkaProducer } = require('../kafka/producer');
 const { TYPE: NOTIFICATION_TYPE } = require('../utils/constants/notification');
 const { GEN_FRIEND_REQUEST_LIST_ROUTE } = require('../utils/constants/clientRoute');
-class FriendService {
+const USER_CONSTANTS = require('../utils/constants/users');
+const { IncorrectPermission } = require('../utils/exceptions/commonExceptions');
+class FriendService extends BasicService {
     constructor() {
+        super();
         this.getPaginatedResults = this.getPaginatedResults.bind(this);
         this.getFriendRequestsWithPagination = this.getFriendRequestsWithPagination.bind(this);
         this.getFriendListWithPagination = this.getFriendListWithPagination.bind(this);
     }
 
-    async getPaginatedResults(query, page, limit) {
-        const skip = (page - 1) * limit;
-        const getResultsPromise = Friend.find(query)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
-        const getTotalDocumentsPromise = Friend.countDocuments(query);
-        const [results, totalDocuments] = await Promise.all([getResultsPromise, getTotalDocumentsPromise]);
-
-        return {
-            results,
-            totalDocuments,
-            totalPages: Math.ceil(totalDocuments / limit)
-        };
-    }
-
     async getFriendRequestsWithPagination(payloads) {
-        const { id, page = 1, limit = 10 } = payloads;
+        const { id, currentUser, page = 1, limit = 10 } = payloads;
 
+        if (id != currentUser.userId && currentUser.role == USER_CONSTANTS.ROLES.USER) {
+            throw new IncorrectPermission();
+        }
+        
         const query = {
             receiver: id,
             isAccepted: false
         };
 
         const { results: friendRequests, totalDocuments: totalRequests, totalPages } =
-            await this.getPaginatedResults(query, page, limit);
+            await this.getPaginatedResults({ model: Friend, query, page, limit });
 
         return {
             page,
@@ -49,7 +41,11 @@ class FriendService {
     }
 
     async getFriendListWithPagination(payloads) {
-        const { id, page = 1, limit = 10 } = payloads;
+        const { id, currentUser, page = 1, limit = 10 } = payloads;
+
+        if (id != currentUser.userId && currentUser.role == USER_CONSTANTS.ROLES.USER) {
+            throw new IncorrectPermission();
+        }
 
         const query = {
             $or: [
@@ -60,7 +56,7 @@ class FriendService {
         };
 
         const { results: friendList, totalDocuments: totalFriends, totalPages } =
-            await this.getPaginatedResults(query, page, limit);
+            await this.getPaginatedResults({ model: Friend, query, page, limit });
 
         return {
             page,
@@ -101,7 +97,7 @@ class FriendService {
         sendCreateNotificationKafkaMessage(
             kafkaProducer,
             {
-                target: friendship.sender,
+                target: friendship.receiver,
                 type: NOTIFICATION_TYPE.FRIEND_REQUEST,
                 content: `New friend request <user>${friendship.sender}</user>`,
                 href: GEN_FRIEND_REQUEST_LIST_ROUTE(friendship.sender)
@@ -129,7 +125,7 @@ class FriendService {
         sendCreateNotificationKafkaMessage(
             kafkaProducer,
             {
-                target: friendRequest.receiver,
+                target: friendRequest.sender,
                 type: NOTIFICATION_TYPE.FRIEND_REQUEST,
                 content: `<user>${friendRequest.receiver}</user> accepted your friend request`,
                 href: GEN_FRIEND_REQUEST_LIST_ROUTE(friendRequest.receiver)

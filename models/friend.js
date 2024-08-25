@@ -1,4 +1,5 @@
-const mongoose = require('../configs/database');
+const mongooseConnection = require('../configs/database');
+const mongoose = require('mongoose');
 const { SenderMustDifferentWithReceiverException } = require('../exceptions/friendExceptions');
 const { TargetNotExistException } = require('../utils/exceptions/commonExceptions');
 const { FRIENDSHIP } = require('../constants/friend');
@@ -82,6 +83,6 @@ FriendSchema.pre('save', async function (next) {
     }
 });
 
-const Friend = mongoose.model('Friend', FriendSchema);
+const Friend = mongooseConnection.model('Friend', FriendSchema);
 
 module.exports = Friend;
