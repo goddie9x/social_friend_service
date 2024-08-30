@@ -4,6 +4,7 @@ const BasicController = require('../utils/controllers/basicController');
 class FriendController extends BasicController {
     constructor() {
         super();
+        this.index = this.index.bind(this)
         this.addFriend = this.addFriend.bind(this);
         this.acceptRequest = this.acceptRequest.bind(this);
         this.getFriendList = this.getFriendList.bind(this);
