@@ -1,6 +1,8 @@
 node_modules
-npm-debug.log
-Dockerfile
-.dockerignore
 logs
+__test__
+jest.config.js
+.gitignore
 .git
+.dockerignore
+Dockerfile
