@@ -2,8 +2,7 @@ const Friend = require('../models/friend');
 const BasicService = require('../utils/services/basicService');
 const { FRIENDSHIP } = require('../constants/friend');
 const { TargetAlreadyExistException, TargetNotExistException, BadRequestException } = require('../utils/exceptions/commonExceptions');
-const { sendCreateNotificationKafkaMessage } = require('../utils/kafka');
-const { kafkaProducer } = require('../kafka/producer');
+const { sendCreateNotificationKafkaMessage } = require('../utils/kafka/producer');
 const { TYPE: NOTIFICATION_TYPE } = require('../utils/constants/notification');
 const { GEN_FRIEND_REQUEST_LIST_ROUTE } = require('../utils/constants/clientRoute');
 const USER_CONSTANTS = require('../utils/constants/users');
@@ -95,7 +94,6 @@ class FriendService extends BasicService {
 
         await friendship.save();
         sendCreateNotificationKafkaMessage(
-            kafkaProducer,
             {
                 target: friendship.receiver,
                 type: NOTIFICATION_TYPE.FRIEND_REQUEST,
@@ -123,7 +121,6 @@ class FriendService extends BasicService {
         await friendRequest.save();
 
         sendCreateNotificationKafkaMessage(
-            kafkaProducer,
             {
                 target: friendRequest.sender,
                 type: NOTIFICATION_TYPE.FRIEND_REQUEST,
