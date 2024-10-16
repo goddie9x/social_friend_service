@@ -15,9 +15,7 @@ class FriendService extends BasicService {
         this.getFriendListWithPagination = this.getFriendListWithPagination.bind(this);
     }
 
-    async getFriendRequestsWithPagination(payloads) {
-        const { id, currentUser, page = 1, limit = 10 } = payloads;
-
+    async getFriendRequestsWithPagination({ id, currentUser, page = 1, limit = 10 }) {
         if (id != currentUser.userId && currentUser.role == USER_CONSTANTS.ROLES.USER) {
             throw new IncorrectPermission();
         }
@@ -39,9 +37,7 @@ class FriendService extends BasicService {
         };
     }
 
-    async getFriendListWithPagination(payloads) {
-        const { id, currentUser, page = 1, limit = 10 } = payloads;
-
+    async getFriendListWithPagination({ id, currentUser, page = 1, limit = 10 }) {
         if (id != currentUser.userId && currentUser.role == USER_CONSTANTS.ROLES.USER) {
             throw new IncorrectPermission();
         }
@@ -66,8 +62,7 @@ class FriendService extends BasicService {
         };
     }
 
-    async addFriend(payloads) {
-        const { currentUser, receiverId, friendshipType } = payloads;
+    async addFriend({ currentUser, receiverId, friendshipType }) {
         const senderId = currentUser.userId;
 
         if (senderId === receiverId) {
@@ -103,9 +98,7 @@ class FriendService extends BasicService {
         );
         return friendship;
     }
-    async acceptRequest(payloads) {
-        const { id, currentUser } = payloads;
-
+    async acceptRequest({ id, currentUser }) {
         const friendRequest = await Friend.findOne({
             _id: id,
             receiver: currentUser.userId,
@@ -130,8 +123,7 @@ class FriendService extends BasicService {
         );
         return friendRequest;
     }
-    async refuseRequest(payloads) {
-        const { id, currentUser } = payloads;
+    async refuseRequest({ id, currentUser }) {
         const friendRequest = await Friend.findOneAndDelete({
             _id: id,
             $or: [
@@ -145,9 +137,7 @@ class FriendService extends BasicService {
             throw new TargetNotExistException('Friend request not found or already accepted.');
         }
     }
-    async deleteFriendship(payloads) {
-        const { id, currentUser } = payloads;
-
+    async deleteFriendship({ id, currentUser }) {
         const friendRequest = await Friend.findOneAndDelete({
             _id: id,
             $or: [
@@ -161,9 +151,7 @@ class FriendService extends BasicService {
             throw new TargetNotExistException('Friendship not found or already accepted.');
         }
     }
-    async getFriendshipInfo(payloads) {
-        const { id, currentUser } = payloads;
-
+    async getFriendshipInfo({ id, currentUser }) {
         const friendship = await Friend.findOne({
             _id: id,
             receiver: currentUser.userId
