@@ -1,7 +1,7 @@
 const mongooseConnection = require('../configs/database');
 const mongoose = require('mongoose');
 const { SenderMustDifferentWithReceiverException } = require('../exceptions/friendExceptions');
-const { TargetNotExistException } = require('../utils/exceptions/commonExceptions');
+const { TargetNotExistException } = require('@godsocial/utils/exceptions/commonExceptions');
 const { FRIENDSHIP } = require('../constants/friend');
 const { getListUserByIds } = require('../grpc/userClient');
 

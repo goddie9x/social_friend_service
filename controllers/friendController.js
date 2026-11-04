@@ -1,5 +1,5 @@
 const friendService = require('../services/friendService');
-const BasicController = require('../utils/controllers/basicController');
+const BasicController = require('@godsocial/utils/controllers/basicController');
 
 class FriendController extends BasicController {
     constructor() {

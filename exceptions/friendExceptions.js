@@ -1,4 +1,4 @@
-const { CommonException } = require('../utils/exceptions/commonExceptions');
+const { CommonException } = require('@godsocial/utils/exceptions/commonExceptions');
 
 class SenderMustDifferentWithReceiverException extends CommonException {
     constructor(message, statusCode, errorCode) {

@@ -1,12 +1,12 @@
 const Friend = require('../models/friend');
-const BasicService = require('../utils/services/basicService');
+const BasicService = require('@godsocial/utils/services/basicService');
 const { FRIENDSHIP } = require('../constants/friend');
-const { TargetAlreadyExistException, TargetNotExistException, BadRequestException } = require('../utils/exceptions/commonExceptions');
-const { sendCreateNotificationKafkaMessage } = require('../utils/kafka/producer');
-const { TYPE: NOTIFICATION_TYPE } = require('../utils/constants/notification');
-const { GEN_FRIEND_REQUEST_LIST_ROUTE } = require('../utils/constants/clientRoute');
-const USER_CONSTANTS = require('../utils/constants/users');
-const { IncorrectPermission } = require('../utils/exceptions/commonExceptions');
+const { TargetAlreadyExistException, TargetNotExistException, BadRequestException } = require('@godsocial/utils/exceptions/commonExceptions');
+const { sendCreateNotificationKafkaMessage } = require('@godsocial/utils/kafka/producer');
+const { TYPE: NOTIFICATION_TYPE } = require('@godsocial/utils/constants/notification');
+const { GEN_FRIEND_REQUEST_LIST_ROUTE } = require('@godsocial/utils/constants/clientRoute');
+const USER_CONSTANTS = require('@godsocial/utils/constants/users');
+const { IncorrectPermission } = require('@godsocial/utils/exceptions/commonExceptions');
 class FriendService extends BasicService {
     constructor() {
         super();

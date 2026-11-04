@@ -1,4 +1,4 @@
-const connectToDB = require('../utils/configs/singleMongoDb');
+const connectToDB = require('@godsocial/utils/configs/singleMongoDb');
 const mongoose = require('mongoose');
 
 connectToDB(mongoose, process.env.MONGODB_URI);
